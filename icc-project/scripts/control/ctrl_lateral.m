@@ -34,8 +34,8 @@ function [deltaAdd, ctrlState] = ctrl_lateral(yawRateRef, yawRate, slipAngle, vx
     %    overshoot 비율 악화 방지.
     %  |β| 큼(한계/제동선회, 예 A7): Ki 강화 → AFS 가 yaw 추종 보조를 적극 수행,
     %    sideSlip 억제. (gain scheduling on body slip angle)
-    Kp_corr = 0.06;
-    Kd_corr = 0.020;
+    Kp_corr = 0.10;
+    Kd_corr = 0.030;
     beta_abs = abs(slipAngle);
     b_lo = deg2rad(1.5);   b_hi = deg2rad(4.0);
     Ki_lo = 0.01;          Ki_hi = 0.10;
