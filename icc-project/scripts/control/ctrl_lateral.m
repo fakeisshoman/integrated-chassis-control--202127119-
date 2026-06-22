@@ -27,9 +27,25 @@ function [deltaAdd, ctrlState] = ctrl_lateral(yawRateRef, yawRate, slipAngle, vx
     yawErr = yawRateRef - yawRate;
 
     % 보정 게인 — P/I/D. D항이 과도구간 overshoot 를 댐핑한다.
-    Kp_corr = 0.08;
-    Ki_corr = 0.06;    % 적분 축소 (step 응답 위상지연 완화)
-    Kd_corr = 0.015;   % 미분 추가 (overshoot 억제)
+    %  Ki 최소화: 적분이 정상상태 yaw rate 를 깎아 overshoot 비율을 키우는
+    %  부작용 방지 (step steer 에서 r_ss 보존). 정상상태 오차는 작아 무시 가능.
+    % 보정 게인 — P/D 고정, Ki 는 slip angle 로 스케줄링.
+    %  |β| 작음(정상 선회/step, 예 A3): Ki 최소화 → 정상상태 yaw rate 보존,
+    %    overshoot 비율 악화 방지.
+    %  |β| 큼(한계/제동선회, 예 A7): Ki 강화 → AFS 가 yaw 추종 보조를 적극 수행,
+    %    sideSlip 억제. (gain scheduling on body slip angle)
+    Kp_corr = 0.06;
+    Kd_corr = 0.020;
+    beta_abs = abs(slipAngle);
+    b_lo = deg2rad(1.5);   b_hi = deg2rad(4.0);
+    Ki_lo = 0.01;          Ki_hi = 0.10;
+    if beta_abs <= b_lo
+        Ki_corr = Ki_lo;
+    elseif beta_abs >= b_hi
+        Ki_corr = Ki_hi;
+    else
+        Ki_corr = Ki_lo + (Ki_hi - Ki_lo) * (beta_abs - b_lo) / (b_hi - b_lo);
+    end
     intMax  = 0.10;
 
     ctrlState.intError = ctrlState.intError + yawErr * dt;
