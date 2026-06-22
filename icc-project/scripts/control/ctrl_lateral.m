@@ -1,13 +1,14 @@
 function [deltaAdd, ctrlState] = ctrl_lateral(yawRateRef, yawRate, slipAngle, vx, ctrlState, CTRL, LIM, dt)
 %CTRL_LATERAL 횡방향 통합 제어기 (AFS + ESC) — 학번 202127119
 %
-%   설계 개요 (v2 — 보정형 AFS):
-%     driver(Stanley)가 이미 경로추종을 수행하므로, AFS 는 yaw rate 추종오차를
-%     메우는 "소권한 보정기"로 동작한다. 전체 조향을 다시 만들지 않는다.
-%     - AFS: yaw rate 오차에 대한 PI 보정 + 조향 권한 제한(AFS_AUTH ±5deg).
-%     - ref 클램프: calc_ref_yaw_rate 가 과도구간에서 물리한계(타이어 포화)를
-%       넘는 목표를 줄 수 있어, ay 기준 최대 yaw rate(mu*g/vx)로 제한.
-%     - ESC(beta-limiter): |beta|>임계 시 보수적 yaw moment.
+%   설계 개요 (v6 — yaw-error 게이팅 ESC):
+%     - AFS: yaw rate 추종 PID 보정 (소권한, ±5deg). Ki 는 slip angle 스케줄링.
+%     - ESC(beta-limiter): |β|>임계 시 yaw moment. 단, "yaw rate 추종오차"가
+%       작은 상황(정상 선회 중 제동, 예 A7 brake-in-turn)에서만 작동하도록
+%       게이팅한다. DLC(A1)처럼 yaw 가 좌우로 격렬히 진동해 순간 추종오차가
+%       큰 회피기동에서는 ESC 차동 brake 가 오히려 차체를 교란(sideSlip↑)하므로
+%       ESC 를 비활성화 → 베이스라인(off) 대비 악화를 방지한다.
+%       게이트는 yawErr 의 저역통과(평활) 값으로 판정해 chattering 을 막는다.
 %
 %   Inputs:  yawRateRef, yawRate, slipAngle, vx, ctrlState, CTRL, LIM, dt
 %   Outputs: deltaAdd.steerAngle [rad], deltaAdd.yawMoment [Nm], ctrlState
@@ -16,6 +17,7 @@ function [deltaAdd, ctrlState] = ctrl_lateral(yawRateRef, yawRate, slipAngle, vx
     if ~isfield(ctrlState, 'intError');  ctrlState.intError  = 0;  end
     if ~isfield(ctrlState, 'prevDelta'); ctrlState.prevDelta = 0;  end
     if ~isfield(ctrlState, 'prevErr');   ctrlState.prevErr   = 0;  end
+    if ~isfield(ctrlState, 'yawErrLP');  ctrlState.yawErrLP  = 0;  end
 
     %% ---- 1. ref 물리 클램프 ----
     mu_g   = 9.81 * 1.0;
@@ -26,14 +28,6 @@ function [deltaAdd, ctrlState] = ctrl_lateral(yawRateRef, yawRate, slipAngle, vx
     %% ---- 2. AFS: 소권한 yaw 보정 (PID) ----
     yawErr = yawRateRef - yawRate;
 
-    % 보정 게인 — P/I/D. D항이 과도구간 overshoot 를 댐핑한다.
-    %  Ki 최소화: 적분이 정상상태 yaw rate 를 깎아 overshoot 비율을 키우는
-    %  부작용 방지 (step steer 에서 r_ss 보존). 정상상태 오차는 작아 무시 가능.
-    % 보정 게인 — P/D 고정, Ki 는 slip angle 로 스케줄링.
-    %  |β| 작음(정상 선회/step, 예 A3): Ki 최소화 → 정상상태 yaw rate 보존,
-    %    overshoot 비율 악화 방지.
-    %  |β| 큼(한계/제동선회, 예 A7): Ki 강화 → AFS 가 yaw 추종 보조를 적극 수행,
-    %    sideSlip 억제. (gain scheduling on body slip angle)
     Kp_corr = 0.10;
     Kd_corr = 0.030;
     beta_abs = abs(slipAngle);
@@ -70,7 +64,23 @@ function [deltaAdd, ctrlState] = ctrl_lateral(yawRateRef, yawRate, slipAngle, vx
     end
     ctrlState.prevDelta = delta_AFS;
 
-    %% ---- 4. ESC: beta-limiter (보수적) ----
+    %% ---- 4. ESC: yaw-error 게이팅 beta-limiter ----
+    %  yawErr 저역통과(평활): 순간 진동 제거. tau≈0.15s
+    alpha = dt / (0.15 + dt);
+    ctrlState.yawErrLP = (1-alpha)*ctrlState.yawErrLP + alpha*abs(yawErr);
+    yawErrSmooth = ctrlState.yawErrLP;
+
+    % 게이트: 추종오차가 작을 때(정상선회 제동, A7)만 ESC full,
+    %         크면(DLC 회피, A1) ESC 비활성. 0.2~0.5 rad/s 사이 선형 전이.
+    g_lo = 0.20;  g_hi = 0.50;
+    if yawErrSmooth <= g_lo
+        esc_gate = 1.0;
+    elseif yawErrSmooth >= g_hi
+        esc_gate = 0.0;
+    else
+        esc_gate = 1.0 - (yawErrSmooth - g_lo) / (g_hi - g_lo);
+    end
+
     beta_th = deg2rad(3.0);
     if isfield(LIM, 'MAX_SLIP_ANGLE')
         beta_th = min(beta_th, 0.6 * LIM.MAX_SLIP_ANGLE);
@@ -84,6 +94,7 @@ function [deltaAdd, ctrlState] = ctrl_lateral(yawRateRef, yawRate, slipAngle, vx
         excess = abs(slipAngle) - beta_th;
         yawMoment = -K_beta * sign(slipAngle) * excess * fvb;
         yawMoment = max(-Mz_max, min(Mz_max, yawMoment));
+        yawMoment = yawMoment * esc_gate;     % yaw-error 게이팅 적용
     end
 
     %% ---- 5. 출력 ----

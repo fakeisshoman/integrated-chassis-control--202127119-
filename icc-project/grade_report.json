@@ -1,37 +1,35 @@
 {
   "student": {
-    "student_id": "TODO_FILL_YOUR_STUDENT_ID",
-    "name": "TODO_FILL_YOUR_NAME",
+    "student_id": "202127119",
+    "name": "최원우",
     "team_members": [],
-    "course": "자동제어 - 2026 봄",
-    "ai_usage": "none"
+    "course": "C050-4/자동제어",
+    "ai_usage": "Claude (Anthropic) used as design/debugging aid: LQI yaw-rate controller derivation, ABS/ESC actuator allocation logic, gain tuning iteration, and KPI-driven debugging. All gains validated and finalized by the student via simulation."
   },
-  "timestamp": "2026-06-23T02:18:04",
+  "timestamp": "2026-06-23T03:27:30",
   "quantitative": {
-    "score": 39.70618443368658,
+    "score": 47.85067032694262,
     "max": 70,
-    "pct": 56.723120619552262
+    "pct": 68.3581004670609
   },
   "deductions": {
-    "amount": 5,
-    "reasons": [
-      "-5: student_info.m 미기입"
-    ]
+    "amount": 0,
+    "reasons": []
   },
   "errors": [],
   "breakdown": [
     {
       "sid": "A3",
       "kpi": "yawRateOvershoot",
-      "value": 7.1017317977434393,
+      "value": 1.9805760616916988,
       "target": 10,
-      "score": 0,
+      "score": 4,
       "max": 4
     },
     {
       "sid": "A3",
       "kpi": "yawRateRiseTime",
-      "value": 0.25,
+      "value": 0.3949999999999998,
       "target": 0.3,
       "score": 0,
       "max": 4
@@ -39,15 +37,15 @@
     {
       "sid": "A3",
       "kpi": "yawRateSettling",
-      "value": 2.136,
+      "value": 0.6120000000000001,
       "target": 0.8,
-      "score": 0,
+      "score": 4,
       "max": 4
     },
     {
       "sid": "A1",
       "kpi": "sideSlipMax",
-      "value": 3.8851670136560617,
+      "value": 3.9274412366435003,
       "target": 3,
       "score": 0,
       "max": 6
@@ -55,15 +53,15 @@
     {
       "sid": "A1",
       "kpi": "LTR_max",
-      "value": 0.71089847711257825,
+      "value": 0.69851397197634646,
       "target": 0.6,
-      "score": 4.0758460240618479,
+      "score": 4.1790502335304458,
       "max": 5
     },
     {
       "sid": "A1",
       "kpi": "lateralDevMax",
-      "value": 1.8653260447499544,
+      "value": 1.852251819675131,
       "target": 0.7,
       "score": 0,
       "max": 4
@@ -71,7 +69,7 @@
     {
       "sid": "A4",
       "kpi": "understeerGradient",
-      "value": 0.00089764135994826577,
+      "value": 0.00073757632127965814,
       "target": 0.003,
       "score": 5,
       "max": 5
@@ -79,7 +77,7 @@
     {
       "sid": "A4",
       "kpi": "sideSlipMax",
-      "value": 1.1808085552949252,
+      "value": 1.1701635502899446,
       "target": 2,
       "score": 5,
       "max": 5
@@ -87,7 +85,7 @@
     {
       "sid": "A7",
       "kpi": "sideSlipMax",
-      "value": 3.4982872057270891,
+      "value": 3.3345279490674478,
       "target": 5,
       "score": 8,
       "max": 8
@@ -95,7 +93,7 @@
     {
       "sid": "A7",
       "kpi": "LTR_max",
-      "value": 0.44296121125410709,
+      "value": 0.43088697949128929,
       "target": 0.7,
       "score": 7,
       "max": 7
@@ -119,7 +117,7 @@
     {
       "sid": "D1",
       "kpi": "sideSlipMax",
-      "value": 3.8851670136560617,
+      "value": 3.9274412366435003,
       "target": 4,
       "score": 4,
       "max": 4
@@ -127,22 +125,22 @@
     {
       "sid": "D1",
       "kpi": "LTR_max",
-      "value": 0.71089847711257825,
+      "value": 0.69851397197634646,
       "target": 0.6,
-      "score": 1.6303384096247391,
+      "score": 1.6716200934121783,
       "max": 2
     },
     {
       "sid": "D1",
       "kpi": "lateralDevMax",
-      "value": 1.8653260447499544,
+      "value": 1.852251819675131,
       "target": 1,
       "score": 0,
       "max": 2
     }
   ],
-  "final_auto": 34.70618443368658,
-  "ctrl_signature": "75d1195b6617904b741cf4122a4a2227db060e708b7a18aa8f7c0113424f85e7",
+  "final_auto": 47.85067032694262,
+  "ctrl_signature": "66f09bdaeb562da068e414d33cad1f2441999b8c71a681b93ec30adf51ee2950",
   "matlab_version": "24.2 (R2024b)",
   "solver_used": "ode45"
 }
