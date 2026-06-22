@@ -6,7 +6,7 @@
     "course": "C050-4/자동제어",
     "ai_usage": "Claude (Anthropic) used as design/debugging aid: LQI yaw-rate controller derivation, ABS/ESC actuator allocation logic, gain tuning iteration, and KPI-driven debugging. All gains validated and finalized by the student via simulation."
   },
-  "timestamp": "2026-06-23T03:27:30",
+  "timestamp": "2026-06-23T03:38:49",
   "quantitative": {
     "score": 47.85067032694262,
     "max": 70,
@@ -45,7 +45,7 @@
     {
       "sid": "A1",
       "kpi": "sideSlipMax",
-      "value": 3.9274412366435003,
+      "value": 3.927386598310024,
       "target": 3,
       "score": 0,
       "max": 6
@@ -61,7 +61,7 @@
     {
       "sid": "A1",
       "kpi": "lateralDevMax",
-      "value": 1.852251819675131,
+      "value": 1.8514977388961003,
       "target": 0.7,
       "score": 0,
       "max": 4
@@ -85,7 +85,7 @@
     {
       "sid": "A7",
       "kpi": "sideSlipMax",
-      "value": 3.3345279490674478,
+      "value": 3.4015653050300982,
       "target": 5,
       "score": 8,
       "max": 8
@@ -117,7 +117,7 @@
     {
       "sid": "D1",
       "kpi": "sideSlipMax",
-      "value": 3.9274412366435003,
+      "value": 3.927386598310024,
       "target": 4,
       "score": 4,
       "max": 4
@@ -133,14 +133,14 @@
     {
       "sid": "D1",
       "kpi": "lateralDevMax",
-      "value": 1.852251819675131,
+      "value": 1.8514977388961003,
       "target": 1,
       "score": 0,
       "max": 2
     }
   ],
   "final_auto": 47.85067032694262,
-  "ctrl_signature": "66f09bdaeb562da068e414d33cad1f2441999b8c71a681b93ec30adf51ee2950",
+  "ctrl_signature": "cd3e705f27e611770b7d988cae94cde92a06781b65d93beb6507c6bc19750c22",
   "matlab_version": "24.2 (R2024b)",
   "solver_used": "ode45"
 }
