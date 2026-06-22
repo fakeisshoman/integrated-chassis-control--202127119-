@@ -6,7 +6,7 @@
     "course": "C050-4/자동제어",
     "ai_usage": "Claude (Anthropic) used as design/debugging aid: LQI yaw-rate controller derivation, ABS/ESC actuator allocation logic, gain tuning iteration, and KPI-driven debugging. All gains validated and finalized by the student via simulation."
   },
-  "timestamp": "2026-06-23T03:38:49",
+  "timestamp": "2026-06-23T04:12:44",
   "quantitative": {
     "score": 47.85067032694262,
     "max": 70,
